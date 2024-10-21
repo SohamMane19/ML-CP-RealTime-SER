@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Emotion Recognition</title>
+</head>
+<body>
+    <h1>Speech Emotion Recognition</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="audio-file" name="file" accept=".wav" required>
+        <button type="submit">Upload and Analyze</button>
+    </form>
+
+    <h3 id="result"></h3>
+    <img id="emotion-distribution" style="display:none;" alt="Emotion Distribution Chart">
+
+    <script>
+        document.getElementById("upload-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var formData = new FormData();
+            var audioFile = document.getElementById("audio-file").files[0];
+            formData.append("file", audioFile);
+
+            fetch("/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").textContent = "Predicted Emotion: " + data.result;
+                var imgElement = document.getElementById("emotion-distribution");
+                imgElement.src = "data:image/png;base64," + data.distribution_image;
+                imgElement.style.display = "block";
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    </script>
+</body>
+</html>
